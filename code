@@ -1,0 +1,59 @@
+google trends
+
+install.packages(c("trendyy", "tidyverse", "lubridate", "DT"))
+load.lib<-c("trendyy", "tidyverse", "lubridate", "DT")
+sapply(load.lib,require,character=TRUE)
+
+
+
+MBA <- trendy("MBA")
+MBA %>%
+  get_interest() %>% 
+  ggplot(aes(x = date, y = hits)) +
+  geom_line()+
+  theme_minimal()+
+  labs(title = "Google Searches for 'MBA' Over Time")
+
+#Create a graph of monthly interest in it.
+
+MBA %>% 
+  get_interest() %>% 
+  mutate(month = month(date)) %>% 
+  group_by(month) %>% 
+  summarize(hits_per_month = mean(hits)) %>% 
+  ggplot(aes(x = month, y = hits_per_month)) +
+  geom_line()+
+  scale_x_discrete(limits = c(1:12))
+
+
+#Create a datatable of interest by DMA (designated market area)
+
+MBA <- trendy("MBA", from = "2016", to = "2021")
+MBA %>% 
+  get_interest_dma() %>% 
+  datatable()
+
+
+
+#Compare interest in MBA to executive_education over time, and create a line graph.
+
+MBA_edu <- trendy(c("MBA", "executive education"))
+MBA_edu %>% 
+  get_interest() %>% 
+  ggplot(aes(x = date, y = hits, color = keyword))+
+  geom_line()
+
+
+#Compare interest in MBA to executive_education in google images over time, and create a line graph.
+
+MBA_edu_images <- trendy(c("MBA", "executive education"), gprop = "images")
+MBA_edu_images %>%
+  get_interest() %>% 
+  mutate(month = month(date)) %>%          
+  group_by(month) %>%                              
+  summarize(hits_per_month = mean(hits)) %>%           
+  ggplot(aes(x = month, y = hits_per_month)) +       
+  geom_line() +
+  scale_x_discrete(limits = c(1:12)) +
+  theme_minimal() +
+  labs(title = "Google Images Searches for 'MBA' and 'executive education' by Month")
